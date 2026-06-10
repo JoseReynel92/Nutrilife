@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>NutriLife — Nutriólogo</title>
+
+<!-- PWA / Add to Home Screen -->
+<meta name="application-name" content="NutriLife Pro">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NutriPro">
+<meta name="theme-color" content="#1a1d22">
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231a1d22'/%3E%3Crect x='100' y='140' width='312' height='40' rx='10' fill='%233DCC6E'/%3E%3Crect x='100' y='220' width='220' height='30' rx='8' fill='rgba(61%2C204%2C110%2C.4)'/%3E%3Crect x='100' y='270' width='270' height='30' rx='8' fill='rgba(61%2C204%2C110%2C.3)'/%3E%3Crect x='100' y='320' width='180' height='30' rx='8' fill='rgba(61%2C204%2C110%2C.2)'/%3E%3Ccircle cx='380' cy='370' r='70' fill='%233DCC6E'/%3E%3Ctext x='380' y='390' text-anchor='middle' font-family='Inter,sans-serif' font-size='60' fill='%23071208'%3E%2B%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231a1d22'/%3E%3Crect x='100' y='140' width='312' height='40' rx='10' fill='%233DCC6E'/%3E%3Crect x='100' y='220' width='220' height='30' rx='8' fill='rgba(61%2C204%2C110%2C.4)'/%3E%3Crect x='100' y='270' width='270' height='30' rx='8' fill='rgba(61%2C204%2C110%2C.3)'/%3E%3Crect x='100' y='320' width='180' height='30' rx='8' fill='rgba(61%2C204%2C110%2C.2)'/%3E%3Ccircle cx='380' cy='370' r='70' fill='%233DCC6E'/%3E%3Ctext x='380' y='390' text-anchor='middle' font-family='Inter,sans-serif' font-size='60' fill='%23071208'%3E%2B%3C/text%3E%3C/svg%3E">
+
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22NutriLife%20Pro%22%2C%22short_name%22%3A%22NutriPro%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231a1d22%22%2C%22theme_color%22%3A%22%231a1d22%22%7D">
+
+<style>
+  body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+  nav { padding-top: max(0px, env(safe-area-inset-top)); }
+</style>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  :root {
+    --accent: #3DCC6E; --accent-dim: rgba(61,204,110,.15); --accent-glow: rgba(61,204,110,.3);
+    --glass: rgba(255,255,255,0.07); --glass-hover: rgba(255,255,255,0.11);
+    --glass-border: rgba(255,255,255,0.13); --bg-from: #1a1d22; --bg-to: #12151a;
+    --text: #F0F2F5; --text-mid: rgba(240,242,245,.65); --text-muted: rgba(240,242,245,.38);
+    --red: #FF5A5A; --orange: #FF9040; --yellow: #FFCA3A; --shadow-sm: 0 4px 16px rgba(0,0,0,.3);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: linear-gradient(145deg,var(--bg-from),var(--bg-to)); min-height: 100vh; color: var(--text); }
+  body::before { content:''; position:fixed; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle,rgba(61,204,110,.1) 0%,transparent 70%); top:-150px; right:-150px; filter:blur(80px); pointer-events:none; z-index:0; }
+
+  nav { display:flex; justify-content:space-between; align-items:center; padding:0 32px; height:64px; background:rgba(18,21,26,.8); backdrop-filter:blur(20px); border-bottom:1px solid var(--glass-border); position:sticky; top:0; z-index:100; }
+  .logo { font-size:18px; font-weight:700; } .logo span { color:var(--accent); } .logo sub { font-size:11px; color:var(--text-muted); font-weight:500; margin-left:6px; }
+  .nav-right { display:flex; align-items:center; gap:12px; }
+
+  .main { max-width:900px; margin:0 auto; padding:28px 20px 80px; position:relative; z-index:1; }
+
+  .card { background:var(--glass); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); border:1px solid var(--glass-border); border-radius:20px; padding:24px; margin-bottom:16px; box-shadow:var(--shadow-sm); }
+  .card-title { font-size:16px; font-weight:600; margin-bottom:18px; display:flex; align-items:center; gap:8px; }
+  .card-title span { color:var(--accent); }
+
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .form-group { margin-bottom:14px; }
+  .form-label { display:block; font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.8px; margin-bottom:6px; }
+  .glass-input { width:100%; padding:11px 14px; border-radius:12px; border:1px solid var(--glass-border); background:rgba(255,255,255,.06); color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none; transition:border-color .2s,background .2s; }
+  .glass-input:focus { border-color:rgba(61,204,110,.5); background:rgba(61,204,110,.06); }
+  .glass-input::placeholder { color:var(--text-muted); }
+  textarea.glass-input { resize:vertical; min-height:80px; }
+
+  .btn { padding:11px 18px; border-radius:12px; border:none; font-family:'Inter',sans-serif; font-weight:600; font-size:14px; cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:6px; }
+  .btn-accent { background:var(--accent); color:#071208; box-shadow:0 4px 16px var(--accent-glow); }
+  .btn-accent:hover { transform:translateY(-1px); box-shadow:0 6px 20px var(--accent-glow); }
+  .btn-accent:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+  .btn-ghost { background:rgba(255,255,255,.08); color:var(--text-mid); border:1px solid var(--glass-border); }
+  .btn-ghost:hover { background:rgba(255,255,255,.13); }
+  .btn-danger { background:rgba(255,90,90,.15); color:var(--red); border:1px solid rgba(255,90,90,.2); }
+  .btn-danger:hover { background:rgba(255,90,90,.25); }
+  .btn-sm { padding:7px 12px; font-size:12px; border-radius:9px; }
+
+  /* weeks */
+  .weeks-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .week-block { background:rgba(255,255,255,.04); border:1px solid var(--glass-border); border-radius:16px; padding:18px; margin-bottom:12px; }
+  .week-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .week-title-input { background:transparent; border:none; color:var(--text); font-family:'Inter',sans-serif; font-size:15px; font-weight:600; outline:none; border-bottom:1px solid var(--glass-border); padding-bottom:4px; width:180px; }
+  .week-title-input::placeholder { color:var(--text-muted); }
+
+  /* days */
+  .days-grid { display:flex; flex-direction:column; gap:10px; }
+  .day-block { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:14px; }
+  .day-header-edit { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+  .day-name-label { font-size:13px; font-weight:600; color:var(--accent); }
+
+  /* meals */
+  .meal-block { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:12px; margin-bottom:8px; }
+  .meal-top { display:grid; grid-template-columns:140px 1fr 80px auto; gap:8px; align-items:center; margin-bottom:8px; }
+  .meal-detail-row { display:grid; grid-template-columns:1fr auto; gap:8px; }
+
+  select.glass-input { cursor:pointer; }
+
+  /* sent plans list */
+  .plan-sent { background:rgba(255,255,255,.04); border:1px solid var(--glass-border); border-radius:14px; padding:16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+  .plan-sent-info .ps-title { font-size:15px; font-weight:600; }
+  .plan-sent-info .ps-meta { font-size:12px; color:var(--text-muted); margin-top:3px; }
+  .ps-badge { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.8px; background:var(--accent-dim); color:var(--accent); border:1px solid rgba(61,204,110,.25); border-radius:20px; padding:3px 10px; }
+
+  .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(60px); background:var(--accent); color:#071208; padding:11px 22px; border-radius:30px; font-weight:600; font-size:14px; box-shadow:0 8px 28px var(--accent-glow); z-index:999; pointer-events:none; white-space:nowrap; transition:transform .4s cubic-bezier(.34,1.56,.64,1); }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+  .tabs-nav { display:flex; gap:6px; margin-bottom:20px; }
+  .tab-btn { padding:8px 18px; border-radius:12px; border:none; font-family:'Inter',sans-serif; font-size:13px; font-weight:500; cursor:pointer; background:transparent; color:var(--text-muted); transition:all .2s; }
+  .tab-btn.active { background:var(--accent-dim); color:var(--accent); border:1px solid rgba(61,204,110,.25); }
+  .tab-btn:hover:not(.active) { background:var(--glass); color:var(--text-mid); }
+  .tab-panel { display:none; } .tab-panel.active { display:block; }
+
+  .divider { height:1px; background:var(--glass-border); margin:16px 0; }
+  .empty-plans { text-align:center; padding:40px; color:var(--text-muted); font-size:14px; }
+
+  @media(max-width:600px) {
+    .form-grid { grid-template-columns:1fr; }
+    .meal-top { grid-template-columns:1fr 1fr; }
+    nav { padding:0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Nutri<span>Life</span><sub>Nutriólogo</sub></div>
+  <div class="nav-right">
+    <span style="font-size:13px;color:var(--text-muted)" id="navNombre"></span>
+  </div>
+</nav>
+
+<div class="main">
+
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab('nuevo')">✏️ Nuevo plan</button>
+    <button class="tab-btn" onclick="switchTab('enviados')">📬 Planes enviados</button>
+  </div>
+
+  <!-- ══ NUEVO PLAN ══ -->
+  <div class="tab-panel active" id="tab-nuevo">
+
+    <!-- Info general -->
+    <div class="card">
+      <div class="card-title">📋 Información del <span>plan</span></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Tu nombre (nutriólogo)</label>
+          <input class="glass-input" id="nutriNombre" placeholder="Ej. Dr. Ana López" oninput="syncNombre()"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email del paciente</label>
+          <input class="glass-input" id="pacienteEmail" type="email" placeholder="paciente@email.com"/>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Título del plan</label>
+          <input class="glass-input" id="planTitulo" placeholder="Ej. Plan de pérdida de peso — Fase 1"/>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Descripción / notas generales</label>
+          <textarea class="glass-input" id="planDesc" placeholder="Instrucciones generales, notas importantes, recomendaciones…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Semanas -->
+    <div class="card">
+      <div class="weeks-header">
+        <div class="card-title" style="margin-bottom:0">🗓️ <span>Semanas</span> del plan</div>
+        <button class="btn btn-ghost btn-sm" onclick="addWeek()">+ Añadir semana</button>
+      </div>
+      <div id="semanasContainer"></div>
+    </div>
+
+    <!-- Enviar -->
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="previewPlan()">👁️ Vista previa</button>
+      <button class="btn btn-accent" onclick="sendPlan()" id="btnSend">
+        📤 Publicar plan para el paciente
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ══ ENVIADOS ══ -->
+  <div class="tab-panel" id="tab-enviados">
+    <div class="card">
+      <div class="card-title">📬 Planes <span>publicados</span></div>
+      <div id="planesEnviados"><div class="empty-plans">Cargando…</div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA_URL = 'https://osqbhrhcjlxrdtujcofx.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zcWJocmhjamx4cmR0dWpjb2Z4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMTc2NTAsImV4cCI6MjA5NjY5MzY1MH0.i2Hy40G4WnrovS3vlWiqO8xJl7C_0Gn25lwqQjlFhzc';
+
+const DIAS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+const MEAL_TYPES = [
+  {v:'desayuno',l:'☀️ Desayuno'},
+  {v:'colacion_m',l:'🍎 Colación mañana'},
+  {v:'almuerzo',l:'🥗 Almuerzo'},
+  {v:'colacion_t',l:'🍌 Colación tarde'},
+  {v:'cena',l:'🌙 Cena'},
+  {v:'snack',l:'🥜 Snack'}
+];
+
+let semanas = [];
+let weekCount = 0;
+
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if(id==='enviados') loadEnviados();
+}
+
+function syncNombre() { document.getElementById('navNombre').textContent = document.getElementById('nutriNombre').value; }
+
+// ── SEMANAS ──
+function addWeek() {
+  weekCount++;
+  const wId = 'w'+Date.now();
+  const semana = { id:wId, nombre:'Semana '+weekCount, dias: DIAS.map(d=>({dia:d,comidas:[]})) };
+  semanas.push(semana);
+  renderSemanas();
+}
+
+function removeWeek(wId) {
+  semanas = semanas.filter(s=>s.id!==wId);
+  renderSemanas();
+}
+
+function renderSemanas() {
+  const container = document.getElementById('semanasContainer');
+  if(!semanas.length) {
+    container.innerHTML = `<div style="text-align:center;padding:30px;color:var(--text-muted);font-size:14px;">Añade al menos una semana para comenzar.</div>`;
+    return;
+  }
+  container.innerHTML = semanas.map((s,si) => `
+    <div class="week-block">
+      <div class="week-header">
+        <input class="week-title-input" value="${s.nombre}" placeholder="Nombre semana" oninput="semanas[${si}].nombre=this.value"/>
+        <button class="btn btn-danger btn-sm" onclick="removeWeek('${s.id}')">✕ Eliminar semana</button>
+      </div>
+      <div class="days-grid">
+        ${s.dias.map((d,di)=>renderDayEdit(si,di,d)).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function renderDayEdit(si,di,dia) {
+  return `
+    <div class="day-block">
+      <div class="day-header-edit">
+        <div class="day-name-label">${dia.dia}</div>
+        <button class="btn btn-ghost btn-sm" onclick="addMeal(${si},${di})">+ Comida</button>
+      </div>
+      <div id="meals-${si}-${di}">
+        ${dia.comidas.map((c,ci)=>renderMealEdit(si,di,ci,c)).join('')}
+        ${!dia.comidas.length?`<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:10px 0;">Sin comidas aún</div>`:''}
+      </div>
+    </div>`;
+}
+
+function renderMealEdit(si,di,ci,c) {
+  const opts = MEAL_TYPES.map(t=>`<option value="${t.v}" ${c.tipo===t.v?'selected':''}>${t.l}</option>`).join('');
+  return `
+    <div class="meal-block" id="meal-${si}-${di}-${ci}">
+      <div class="meal-top">
+        <select class="glass-input" onchange="updateMeal(${si},${di},${ci},'tipo',this.value)">${opts}</select>
+        <input class="glass-input" placeholder="Nombre del platillo" value="${c.nombre||''}" oninput="updateMeal(${si},${di},${ci},'nombre',this.value)"/>
+        <input class="glass-input" type="number" placeholder="kcal" value="${c.kcal||''}" oninput="updateMeal(${si},${di},${ci},'kcal',parseInt(this.value)||0)"/>
+        <button class="btn btn-danger btn-sm" onclick="removeMeal(${si},${di},${ci})">✕</button>
+      </div>
+      <input class="glass-input" placeholder="Detalle: cantidades, preparación, sustituciones…" value="${c.detalle||''}" oninput="updateMeal(${si},${di},${ci},'detalle',this.value)"/>
+    </div>`;
+}
+
+function addMeal(si,di) {
+  semanas[si].dias[di].comidas.push({tipo:'desayuno',nombre:'',kcal:0,detalle:''});
+  renderSemanas();
+}
+function removeMeal(si,di,ci) { semanas[si].dias[di].comidas.splice(ci,1); renderSemanas(); }
+function updateMeal(si,di,ci,field,val) { semanas[si].dias[di].comidas[ci][field]=val; }
+
+// ── ENVIAR ──
+async function sendPlan() {
+  const nombre = document.getElementById('nutriNombre').value.trim();
+  const email = document.getElementById('pacienteEmail').value.trim();
+  const titulo = document.getElementById('planTitulo').value.trim();
+  const desc = document.getElementById('planDesc').value.trim();
+
+  if(!nombre||!email||!titulo) { showToast('Completa nombre, email y título','#FF9040'); return; }
+  if(!semanas.length) { showToast('Añade al menos una semana','#FF9040'); return; }
+
+  const btn = document.getElementById('btnSend');
+  btn.disabled=true; btn.textContent='Publicando…';
+
+  const payload = {
+    paciente_email: email,
+    titulo,
+    descripcion: desc,
+    semanas: semanas,
+    nutriologo_nombre: nombre
+  };
+
+  try {
+    const resp = await fetch(`${SUPA_URL}/rest/v1/planes`, {
+      method:'POST',
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': `Bearer ${SUPA_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if(resp.ok) {
+      showToast('✅ Plan publicado correctamente');
+      resetForm();
+    } else {
+      const err = await resp.json();
+      showToast('Error: '+JSON.stringify(err),'#FF5A5A');
+    }
+  } catch(e) {
+    showToast('Error de conexión','#FF5A5A');
+  }
+
+  btn.disabled=false; btn.innerHTML='📤 Publicar plan para el paciente';
+}
+
+function resetForm() {
+  document.getElementById('pacienteEmail').value='';
+  document.getElementById('planTitulo').value='';
+  document.getElementById('planDesc').value='';
+  semanas=[]; weekCount=0; renderSemanas();
+}
+
+// ── PREVIEW ──
+function previewPlan() {
+  const titulo = document.getElementById('planTitulo').value||'Sin título';
+  const email = document.getElementById('pacienteEmail').value||'—';
+  let msg = `📋 ${titulo}\n👤 Para: ${email}\n\n`;
+  semanas.forEach(s=>{
+    msg+=`📅 ${s.nombre}\n`;
+    s.dias.forEach(d=>{
+      if(d.comidas.length){
+        msg+=`  ${d.dia}:\n`;
+        d.comidas.forEach(c=>{ msg+=`    • ${c.nombre} (${c.kcal||0} kcal)\n`; });
+      }
+    });
+  });
+  alert(msg);
+}
+
+// ── ENVIADOS ──
+async function loadEnviados() {
+  const el = document.getElementById('planesEnviados');
+  el.innerHTML='<div class="empty-plans">Cargando…</div>';
+  try {
+    const resp = await fetch(`${SUPA_URL}/rest/v1/planes?order=created_at.desc&limit=50`, {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
+    });
+    const data = await resp.json();
+    if(!data.length){ el.innerHTML='<div class="empty-plans">Aún no has publicado ningún plan.</div>'; return; }
+    el.innerHTML = data.map(p=>{
+      const fecha = new Date(p.created_at).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
+      const semCount = (p.semanas||[]).length;
+      return `
+        <div class="plan-sent">
+          <div class="plan-sent-info">
+            <div class="ps-title">${p.titulo}</div>
+            <div class="ps-meta">📧 ${p.paciente_email} · ${semCount} semana${semCount!==1?'s':''} · ${fecha}</div>
+          </div>
+          <div class="ps-badge">Activo</div>
+        </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML='<div class="empty-plans">Error al cargar.</div>'; }
+}
+
+function showToast(msg,color='#3DCC6E'){
+  const t=document.getElementById('toast');t.textContent=msg;t.style.background=color;t.style.color=color==='#3DCC6E'?'#071208':'#fff';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// Init
+addWeek();
+</script>
+</body>
+</html>

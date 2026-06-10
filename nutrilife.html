@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>NutriLife</title>
+
+<!-- PWA / Add to Home Screen -->
+<meta name="application-name" content="NutriLife">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NutriLife">
+<meta name="theme-color" content="#1a1d22">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Tu asistente de nutrición personal">
+
+<!-- Ícono generado como SVG inline convertido a data URI -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231a1d22'/%3E%3Ccircle cx='256' cy='256' r='180' fill='none' stroke='%23223322' stroke-width='28'/%3E%3Ccircle cx='256' cy='256' r='180' fill='none' stroke='%233DCC6E' stroke-width='28' stroke-linecap='round' stroke-dasharray='565' stroke-dashoffset='160'/%3E%3Ctext x='256' y='230' text-anchor='middle' font-family='Inter,sans-serif' font-size='90' font-weight='700' fill='%23F0F2F5'%3EN%3C/text%3E%3Ctext x='256' y='320' text-anchor='middle' font-family='Inter,sans-serif' font-size='36' font-weight='500' fill='%233DCC6E'%3ELIFE%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231a1d22'/%3E%3Ccircle cx='256' cy='256' r='180' fill='none' stroke='%23223322' stroke-width='28'/%3E%3Ccircle cx='256' cy='256' r='180' fill='none' stroke='%233DCC6E' stroke-width='28' stroke-linecap='round' stroke-dasharray='565' stroke-dashoffset='160'/%3E%3Ctext x='256' y='230' text-anchor='middle' font-family='Inter,sans-serif' font-size='90' font-weight='700' fill='%23F0F2F5'%3EN%3C/text%3E%3Ctext x='256' y='320' text-anchor='middle' font-family='Inter,sans-serif' font-size='36' font-weight='500' fill='%233DCC6E'%3ELIFE%3C/text%3E%3C/svg%3E">
+
+<!-- PWA Manifest inline -->
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22NutriLife%22%2C%22short_name%22%3A%22NutriLife%22%2C%22description%22%3A%22Tu%20asistente%20de%20nutrici%C3%B3n%20personal%22%2C%22start_url%22%3A%22.%2Fnutrilife.html%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231a1d22%22%2C%22theme_color%22%3A%22%231a1d22%22%2C%22orientation%22%3A%22portrait%22%7D">
+
+<style>
+  /* Safe area para notch / Dynamic Island */
+  body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+  nav { padding-top: max(0px, env(safe-area-inset-top)); }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --accent:       #3DCC6E;
+    --accent-dim:   rgba(61,204,110,.18);
+    --accent-glow:  rgba(61,204,110,.35);
+    --glass:        rgba(255,255,255,0.07);
+    --glass-hover:  rgba(255,255,255,0.11);
+    --glass-border: rgba(255,255,255,0.13);
+    --glass-strong: rgba(255,255,255,0.12);
+    --bg-from:      #1a1d22;
+    --bg-to:        #12151a;
+    --text:         #F0F2F5;
+    --text-mid:     rgba(240,242,245,.65);
+    --text-muted:   rgba(240,242,245,.38);
+    --red:          #FF5A5A;
+    --orange:       #FF9040;
+    --yellow:       #FFCA3A;
+    --purple:       #B57BFF;
+    --shadow:       0 8px 32px rgba(0,0,0,.45);
+    --shadow-sm:    0 4px 16px rgba(0,0,0,.3);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(145deg, var(--bg-from) 0%, var(--bg-to) 100%);
+    background-attachment: fixed;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before, body::after {
+    content: ''; position: fixed; border-radius: 50%;
+    filter: blur(90px); pointer-events: none; z-index: 0;
+  }
+  body::before {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(61,204,110,.12) 0%, transparent 70%);
+    top: -120px; right: -100px;
+  }
+  body::after {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(61,204,110,.07) 0%, transparent 70%);
+    bottom: -100px; left: -80px;
+  }
+  nav {
+    position: sticky; top: 0; z-index: 200;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 28px; height: 60px;
+    background: rgba(18,21,26,.75);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .logo { font-size: 18px; font-weight: 700; color: var(--text); }
+  .logo span { color: var(--accent); }
+  .nav-tabs { display: flex; gap: 4px; }
+  .nav-tab {
+    padding: 7px 13px; border-radius: 10px; border: none;
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: all .2s; background: transparent; color: var(--text-muted);
+  }
+  .nav-tab:hover:not(.active) { background: var(--glass); color: var(--text-mid); }
+  .nav-tab.active { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(61,204,110,.25); }
+  .streak { font-weight: 600; font-size: 14px; color: var(--orange); }
+
+  .panel { display: none; position: relative; z-index: 1; padding: 22px 20px 90px; max-width: 720px; margin: 0 auto; }
+  .panel.active { display: block; }
+
+  .card {
+    background: var(--glass); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px;
+    margin-bottom: 12px; box-shadow: var(--shadow-sm); transition: background .2s;
+  }
+  .card:hover { background: var(--glass-hover); }
+  .card-label { font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; }
+  .card-label-accent { color: var(--accent); font-size: 13px; font-weight: 600; margin-bottom: 14px; }
+
+  .ring-hero {
+    background: var(--glass-strong); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border); border-radius: 24px;
+    padding: 28px 20px 22px; margin-bottom: 12px; box-shadow: var(--shadow);
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .ring-wrap { position: relative; width: 200px; height: 200px; cursor: pointer; }
+  .ring-svg { transform: rotate(-90deg); }
+  .ring-svg circle { transition: stroke-dashoffset .9s cubic-bezier(.4,0,.2,1), stroke .4s; }
+  .ring-track { stroke: rgba(255,255,255,.08); }
+  .ring-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; }
+  .ring-emoji { font-size: 34px; animation: bob 2.2s ease-in-out infinite; display: block; }
+  @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+  .ring-cals { font-size: 32px; font-weight: 700; color: var(--text); line-height: 1; margin-top: 6px; }
+  .ring-unit { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+  .ring-remaining { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-top: 4px; }
+  .lives { display: flex; gap: 7px; margin-top: 18px; }
+  .life { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); transition: all .3s; }
+  .life.lost { background: rgba(255,255,255,.1); box-shadow: none; }
+
+  .input-row { display: flex; gap: 8px; }
+  .glass-input {
+    flex: 1; padding: 11px 15px; border-radius: 12px;
+    border: 1px solid var(--glass-border); background: rgba(255,255,255,.06);
+    color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; outline: none;
+    transition: border-color .2s, background .2s;
+  }
+  .glass-input:focus { border-color: rgba(61,204,110,.5); background: rgba(61,204,110,.07); }
+  .glass-input::placeholder { color: var(--text-muted); }
+
+  .btn {
+    padding: 11px 18px; border-radius: 12px; border: none;
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px;
+    cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  }
+  .btn-accent { background: var(--accent); color: #0a1a10; box-shadow: 0 4px 16px var(--accent-glow); }
+  .btn-accent:hover { transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+  .btn-accent:active { transform: translateY(1px); }
+  .btn-ghost { background: rgba(255,255,255,.08); color: var(--text-mid); border: 1px solid var(--glass-border); }
+  .btn-ghost:hover { background: rgba(255,255,255,.13); }
+  .btn-sm { padding: 7px 13px; font-size: 12px; border-radius: 9px; }
+
+  .ai-result {
+    display: none; margin-top: 12px; background: rgba(61,204,110,.05);
+    border: 1px solid rgba(61,204,110,.2); border-radius: 16px; padding: 16px;
+    animation: slideIn .3s ease;
+  }
+  .ai-result.show { display: block; }
+  @keyframes slideIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+  .ai-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .food-name-big { font-size: 16px; font-weight: 600; }
+  .food-kcal-big { font-size: 22px; font-weight: 700; color: var(--accent); }
+  .pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .pill { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 3px; }
+  .pill-p { background: rgba(181,123,255,.15); color: var(--purple); border: 1px solid rgba(181,123,255,.2); }
+  .pill-c { background: rgba(255,202,58,.12); color: var(--yellow); border: 1px solid rgba(255,202,58,.2); }
+  .pill-f { background: rgba(255,144,64,.12); color: var(--orange); border: 1px solid rgba(255,144,64,.2); }
+  .pill-fi { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(61,204,110,.25); }
+  .micro-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 10px; }
+  .micro-item { background: rgba(255,255,255,.05); border-radius: 10px; padding: 8px; text-align: center; border: 1px solid var(--glass-border); }
+  .micro-val { font-size: 12px; font-weight: 600; }
+  .micro-lbl { font-size: 9px; color: var(--text-muted); font-weight: 500; margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }
+  .ai-tip { font-size: 12px; color: var(--text-mid); font-style: italic; background: var(--accent-dim); border-radius: 9px; padding: 8px 12px; margin-bottom: 12px; border-left: 2px solid var(--accent); }
+  .ai-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+  .loading-dots { display: flex; gap: 5px; justify-content: center; padding: 14px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: bounce .55s infinite alternate; }
+  .dot:nth-child(2){animation-delay:.18s} .dot:nth-child(3){animation-delay:.36s}
+  @keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-9px)}}
+
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin: 6px 0 10px; }
+  .food-item {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--glass); backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border); border-radius: 14px;
+    padding: 12px 14px; margin-bottom: 8px; animation: slideIn .2s ease; transition: background .2s;
+  }
+  .food-item:hover { background: var(--glass-hover); }
+  .fi-icon { font-size: 22px; }
+  .fi-info { flex: 1; }
+  .fi-name { font-size: 14px; font-weight: 500; }
+  .fi-macros { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .fi-kcal { font-size: 15px; font-weight: 700; color: var(--accent); }
+  .fi-remove { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 5px 7px; border-radius: 7px; transition: all .15s; }
+  .fi-remove:hover { background: rgba(255,90,90,.15); color: var(--red); }
+
+  .stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 12px; }
+  .stat-box { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 16px; padding: 16px; text-align: center; box-shadow: var(--shadow-sm); }
+  .stat-num { font-size: 22px; font-weight: 700; }
+  .stat-lbl { font-size: 10px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: .8px; margin-top: 3px; }
+  .chart-wrap { position: relative; height: 190px; }
+
+  .form-group { margin-bottom: 12px; }
+  .form-label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .tag-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tag { padding: 7px 14px; border-radius: 20px; border: 1px solid var(--glass-border); background: rgba(255,255,255,.05); color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .2s; }
+  .tag.selected { border-color: rgba(61,204,110,.4); color: var(--accent); background: var(--accent-dim); }
+
+  .weight-entry { background: rgba(255,255,255,.05); border-radius: 12px; border: 1px solid var(--glass-border); padding: 12px 15px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .weight-date { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+  .weight-val { font-size: 18px; font-weight: 700; color: var(--accent); }
+  .weight-delta { font-size: 12px; font-weight: 600; }
+  .weight-delta.down { color: var(--accent); }
+  .weight-delta.up { color: var(--red); }
+  .weight-note { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── PLANES ── */
+  .plan-hero {
+    background: linear-gradient(135deg, rgba(61,204,110,.15) 0%, rgba(61,204,110,.05) 100%);
+    border: 1px solid rgba(61,204,110,.25); border-radius: 20px;
+    padding: 22px; margin-bottom: 14px;
+  }
+  .plan-hero-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .plan-badge { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(61,204,110,.3); border-radius: 20px; padding: 4px 10px; }
+  .plan-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .plan-meta { font-size: 12px; color: var(--text-muted); }
+  .plan-desc { font-size: 13px; color: var(--text-mid); line-height: 1.6; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--glass-border); }
+
+  .week-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .week-tab { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--glass-border); background: transparent; color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .2s; }
+  .week-tab.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(61,204,110,.3); }
+
+  .day-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 16px; margin-bottom: 10px; overflow: hidden; }
+  .day-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: pointer; }
+  .day-name { font-size: 14px; font-weight: 600; }
+  .day-kcal { font-size: 12px; color: var(--accent); font-weight: 600; }
+  .day-chevron { color: var(--text-muted); font-size: 12px; transition: transform .2s; }
+  .day-card.open .day-chevron { transform: rotate(180deg); }
+  .day-body { display: none; padding: 0 16px 14px; }
+  .day-card.open .day-body { display: block; }
+
+  .meal-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .meal-row:last-child { border-bottom: none; }
+  .meal-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .meal-info { flex: 1; }
+  .meal-type { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--text-muted); }
+  .meal-name { font-size: 14px; font-weight: 500; margin-top: 2px; }
+  .meal-detail { font-size: 12px; color: var(--text-muted); margin-top: 3px; line-height: 1.5; }
+  .meal-kcal { font-size: 13px; font-weight: 700; color: var(--accent); flex-shrink: 0; margin-top: 3px; }
+
+  .email-input-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 24px; text-align: center; }
+  .email-input-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .email-input-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
+  .email-row { display: flex; gap: 8px; max-width: 400px; margin: 0 auto; }
+
+  .plan-loading { text-align: center; padding: 40px; color: var(--text-muted); }
+  .plan-empty { text-align: center; padding: 50px 20px; color: var(--text-muted); }
+  .plan-empty-icon { font-size: 48px; margin-bottom: 12px; opacity: .5; }
+  .plan-empty p { font-size: 14px; font-weight: 500; }
+
+  .toast {
+    position: fixed; bottom: 76px; left: 50%;
+    transform: translateX(-50%) translateY(70px);
+    background: var(--accent); color: #081510;
+    padding: 11px 22px; border-radius: 30px;
+    font-weight: 600; font-size: 14px;
+    box-shadow: 0 8px 28px rgba(61,204,110,.4);
+    z-index: 999; pointer-events: none; white-space: nowrap;
+    transition: transform .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 998; overflow: hidden; }
+  .confetti-piece { position: absolute; border-radius: 2px; animation: fall 1.6s ease-in forwards; }
+  @keyframes fall { from{transform:translateY(-20px) rotate(0)} to{transform:translateY(110vh) rotate(720deg);opacity:0} }
+  .empty { text-align: center; padding: 36px 20px; color: var(--text-muted); }
+  .empty-icon { font-size: 40px; margin-bottom: 10px; opacity: .6; }
+  .empty p { font-size: 13px; font-weight: 500; }
+
+  @media(max-width:480px) {
+    .form-row { grid-template-columns: 1fr; }
+    .micro-grid { grid-template-columns: repeat(2,1fr); }
+    .stat-row { grid-template-columns: 1fr 1fr; }
+    nav { padding: 0 14px; }
+    .nav-tab { padding: 6px 10px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Nutri<span>Life</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPanel('home')">🍎 Hoy</button>
+    <button class="nav-tab" onclick="showPanel('progress')">📊 Stats</button>
+    <button class="nav-tab" onclick="showPanel('planes')">📋 Mi Plan</button>
+    <button class="nav-tab" onclick="showPanel('profile')">⚙️ Perfil</button>
+  </div>
+  <div class="streak" id="streakDisplay">🔥 0</div>
+</nav>
+
+<!-- ══ HOME ══ -->
+<div id="panel-home" class="panel active">
+  <div class="ring-hero">
+    <div class="ring-wrap" onclick="showPanel('progress')">
+      <svg class="ring-svg" width="200" height="200" viewBox="0 0 200 200">
+        <circle class="ring-track" cx="100" cy="100" r="84" fill="none" stroke-width="14"/>
+        <circle id="ringFill" cx="100" cy="100" r="84" fill="none"
+          stroke="#3DCC6E" stroke-width="14" stroke-linecap="round"
+          stroke-dasharray="527.8" stroke-dashoffset="527.8"/>
+      </svg>
+      <div class="ring-center">
+        <span class="ring-emoji" id="ringEmoji">😴</span>
+        <div class="ring-cals" id="ringCals">0</div>
+        <div class="ring-unit">kcal hoy</div>
+        <div class="ring-remaining" id="ringRemaining">Meta: 2000</div>
+      </div>
+    </div>
+    <div class="lives" id="livesRow"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label-accent">¿Qué comiste?</div>
+    <div class="input-row">
+      <input class="glass-input" id="foodQuery" placeholder="ej. 2 tacos de pastor, 1 manzana…" onkeydown="if(event.key==='Enter') analyzeFood()"/>
+      <button class="btn btn-accent" onclick="analyzeFood()">Analizar ✨</button>
+    </div>
+    <div id="loadingDots" style="display:none;">
+      <div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    </div>
+    <div class="ai-result" id="aiResult">
+      <div class="ai-header">
+        <div><div class="food-name-big" id="resName"></div><div class="pills" id="resPills"></div></div>
+        <div class="food-kcal-big" id="resKcal"></div>
+      </div>
+      <div class="micro-grid" id="resMicros"></div>
+      <div class="ai-tip" id="resNote"></div>
+      <div class="ai-actions">
+        <button class="btn btn-ghost btn-sm" onclick="cancelFood()">Cancelar</button>
+        <button class="btn btn-accent btn-sm" onclick="confirmFood()">✅ Agregar</button>
+      </div>
+    </div>
+  </div>
+  <div class="section-label">Registro de hoy</div>
+  <div id="foodLog"></div>
+</div>
+
+<!-- ══ PROGRESS ══ -->
+<div id="panel-progress" class="panel">
+  <div class="stat-row" id="statRow"></div>
+  <div class="card">
+    <div class="card-label">Macros del día</div>
+    <div class="chart-wrap"><canvas id="macroChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-label">Calorías esta semana</div>
+    <div class="chart-wrap"><canvas id="weekChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-label">Registro de peso ⚖️</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input class="glass-input" id="newWeight" type="number" placeholder="Peso (kg)" style="max-width:120px;"/>
+      <input class="glass-input" id="newNote" placeholder="Nota opcional" style="flex:1;"/>
+      <button class="btn btn-accent btn-sm" onclick="logWeight()">Guardar</button>
+    </div>
+    <div id="weightLog"></div>
+  </div>
+</div>
+
+<!-- ══ PLANES ══ -->
+<div id="panel-planes" class="panel">
+  <div id="planesContent"></div>
+</div>
+
+<!-- ══ PROFILE ══ -->
+<div id="panel-profile" class="panel">
+  <div class="card">
+    <div class="card-label-accent">🎯 Tu meta</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Calorías meta (kcal/día)</label>
+        <input class="glass-input" id="calGoal" type="number" value="2000" onchange="saveProfile()" style="width:100%;"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Proteína meta (g/día)</label>
+        <input class="glass-input" id="proteinGoal" type="number" value="150" onchange="saveProfile()" style="width:100%;"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Objetivo</label>
+      <div class="tag-row" id="goalTags">
+        <button class="tag selected" onclick="selectGoal(this,'bajar')">📉 Bajar de peso</button>
+        <button class="tag" onclick="selectGoal(this,'mantener')">⚖️ Mantener</button>
+        <button class="tag" onclick="selectGoal(this,'subir')">📈 Ganar músculo</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-label-accent">👤 Datos personales</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Email (para recibir planes)</label>
+        <input class="glass-input" id="profEmail" type="email" placeholder="tu@email.com" onchange="saveProfile()" style="width:100%;"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Edad</label>
+        <input class="glass-input" id="profAge" type="number" placeholder="25" onchange="saveProfile()" style="width:100%;"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Peso actual (kg)</label>
+        <input class="glass-input" id="profWeight" type="number" placeholder="75" onchange="saveProfile()" style="width:100%;"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Estatura (cm)</label>
+        <input class="glass-input" id="profHeight" type="number" placeholder="175" onchange="saveProfile()" style="width:100%;"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Sexo</label>
+        <select class="glass-input" id="profSex" onchange="saveProfile()" style="width:100%;">
+          <option value="m">Masculino</option>
+          <option value="f">Femenino</option>
+        </select>
+      </div>
+      <div class="form-group" style="display:flex;align-items:flex-end;">
+        <button class="btn btn-accent" style="width:100%;justify-content:center;" onclick="calcTDEE()">🧮 Calcular TDEE</button>
+      </div>
+    </div>
+    <div id="tdeeResult" style="margin-top:8px;font-size:12px;color:var(--text-mid);line-height:1.6;"></div>
+  </div>
+  <div class="card">
+    <div class="card-label-accent">💧 Agua y sueño</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Agua meta (L/día)</label>
+        <input class="glass-input" id="waterGoal" type="number" value="2.5" step="0.5" onchange="saveProfile()" style="width:100%;"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sueño meta (horas)</label>
+        <input class="glass-input" id="sleepGoal" type="number" value="8" onchange="saveProfile()" style="width:100%;"/>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="confetti-wrap" id="confetti"></div>
+
+<script>
+const SUPA_URL  = 'https://osqbhrhcjlxrdtujcofx.supabase.co';
+const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zcWJocmhjamx4cmR0dWpjb2Z4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMTc2NTAsImV4cCI6MjA5NjY5MzY1MH0.i2Hy40G4WnrovS3vlWiqO8xJl7C_0Gn25lwqQjlFhzc';
+
+let state = JSON.parse(localStorage.getItem('nl_state') || 'null') || {
+  todayLog:[], weightLog:[], weekHistory:[], streak:0, lastDate:null,
+  profile:{ calGoal:2000, proteinGoal:150, goal:'bajar', email:'', age:'', weight:'', height:'', sex:'m', waterGoal:2.5, sleepGoal:8 }
+};
+let pendingFood=null, macroChart=null, weekChart=null, currentPlan=null, activeWeek=0;
+function save() { localStorage.setItem('nl_state', JSON.stringify(state)); }
+function today() { return new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+
+function checkStreak() {
+  const t=today();
+  if(state.lastDate!==t){ if(state.todayLog.length>0) state.streak++; state.todayLog=[]; state.lastDate=t; save(); }
+}
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  const idx=['home','progress','planes','profile'].indexOf(id);
+  document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+  if(id==='progress') renderProgress();
+  if(id==='planes') renderPlanes();
+}
+
+// ── RING ──
+function updateRing() {
+  const goal=state.profile.calGoal||2000;
+  const eaten=state.todayLog.reduce((s,f)=>s+f.kcal,0);
+  const pct=Math.min(eaten/goal,1);
+  const ring=document.getElementById('ringFill');
+  ring.style.strokeDashoffset=527.8-pct*527.8;
+  const remaining=goal-eaten;
+  document.getElementById('ringCals').textContent=eaten.toFixed(0);
+  document.getElementById('ringRemaining').textContent=remaining>0?`Faltan ${remaining.toFixed(0)} kcal`:'¡Meta lograda! 🎉';
+  let emoji='😴',color='#3DCC6E';
+  if(pct>.1) emoji='😊'; if(pct>.4) emoji='💪'; if(pct>.7) emoji='🔥';
+  if(pct>=1){emoji='🏆';color='#FFCA3A';setTimeout(celebrate,300);}
+  if(eaten>goal*1.1){color='#FF5A5A';emoji='⚠️';}
+  ring.style.stroke=color;
+  document.getElementById('ringEmoji').textContent=emoji;
+  document.getElementById('ringRemaining').style.color=remaining<0?'#FF5A5A':'rgba(240,242,245,.38)';
+  const lives=document.getElementById('livesRow');
+  const lr=Math.ceil(pct*5); lives.innerHTML='';
+  for(let i=0;i<5;i++){const d=document.createElement('div');d.className='life'+(i>=lr?' lost':'');lives.appendChild(d);}
+  document.getElementById('streakDisplay').textContent='🔥 '+(state.streak||0);
+}
+
+// ── AI FOOD ──
+async function analyzeFood() {
+  const q=document.getElementById('foodQuery').value.trim(); if(!q) return;
+  document.getElementById('loadingDots').style.display='block';
+  document.getElementById('aiResult').classList.remove('show');
+  const prompt=`Eres un nutriólogo experto. El usuario comió: "${q}".
+Responde SOLO con JSON válido (sin markdown):
+{"nombre":"nombre bonito","emoji":"emoji apropiado","kcal":número,"proteina":número,"carbos":número,"grasa":número,"fibra":número,"calcio":"valor mg","hierro":"valor mg","vitamina_c":"valor mg","sodio":"valor mg","potasio":"valor mg","vitamina_d":"valor µg","nota":"tip nutricional corto en español mexicano casual"}
+Valores numéricos como números, no strings.`;
+  try {
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await resp.json();
+    const food=JSON.parse(data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim());
+    pendingFood=food; showResult(food);
+  } catch(e){showToast('Error al analizar. Intenta de nuevo.','#FF5A5A');}
+  document.getElementById('loadingDots').style.display='none';
+}
+function showResult(f){
+  document.getElementById('resName').textContent=(f.emoji||'🍽️')+' '+f.nombre;
+  document.getElementById('resKcal').textContent=f.kcal+' kcal';
+  document.getElementById('resPills').innerHTML=`<span class="pill pill-p">🥩 ${f.proteina}g prot</span><span class="pill pill-c">🌾 ${f.carbos}g carbs</span><span class="pill pill-f">🥑 ${f.grasa}g grasa</span><span class="pill pill-fi">🌿 ${f.fibra}g fibra</span>`;
+  document.getElementById('resMicros').innerHTML=`<div class="micro-item"><div class="micro-val">${f.calcio||'—'}</div><div class="micro-lbl">Calcio</div></div><div class="micro-item"><div class="micro-val">${f.hierro||'—'}</div><div class="micro-lbl">Hierro</div></div><div class="micro-item"><div class="micro-val">${f.vitamina_c||'—'}</div><div class="micro-lbl">Vit. C</div></div><div class="micro-item"><div class="micro-val">${f.sodio||'—'}</div><div class="micro-lbl">Sodio</div></div><div class="micro-item"><div class="micro-val">${f.potasio||'—'}</div><div class="micro-lbl">Potasio</div></div><div class="micro-item"><div class="micro-val">${f.vitamina_d||'—'}</div><div class="micro-lbl">Vit. D</div></div>`;
+  document.getElementById('resNote').textContent='💡 '+(f.nota||'');
+  document.getElementById('aiResult').classList.add('show');
+}
+function cancelFood(){pendingFood=null;document.getElementById('aiResult').classList.remove('show');document.getElementById('foodQuery').value='';}
+function confirmFood(){
+  if(!pendingFood) return;
+  state.todayLog.push({...pendingFood,time:new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})});
+  save();renderFoodLog();updateRing();showToast(`✅ ${pendingFood.nombre} — ${pendingFood.kcal} kcal`);cancelFood();
+}
+function renderFoodLog(){
+  const el=document.getElementById('foodLog');
+  if(!state.todayLog.length){el.innerHTML=`<div class="empty"><div class="empty-icon">🍽️</div><p>Aún no registras nada hoy.<br>¡Empieza añadiendo lo que comiste!</p></div>`;return;}
+  el.innerHTML=state.todayLog.map((f,i)=>`<div class="food-item"><div class="fi-icon">${f.emoji||'🍽️'}</div><div class="fi-info"><div class="fi-name">${f.nombre}</div><div class="fi-macros">P:${f.proteina}g · C:${f.carbos}g · G:${f.grasa}g · ${f.time}</div></div><div class="fi-kcal">${f.kcal}</div><button class="fi-remove" onclick="removeFood(${i})">✕</button></div>`).join('');
+}
+function removeFood(i){state.todayLog.splice(i,1);save();renderFoodLog();updateRing();}
+
+// ── PROGRESS ──
+function renderProgress(){renderStats();renderMacroChart();renderWeekChart();renderWeightLog();}
+function renderStats(){
+  const eaten=state.todayLog.reduce((s,f)=>s+f.kcal,0);
+  const goal=state.profile.calGoal||2000;
+  const prot=state.todayLog.reduce((s,f)=>s+f.proteina,0);
+  const protGoal=state.profile.proteinGoal||150;
+  document.getElementById('statRow').innerHTML=`<div class="stat-box"><div class="stat-num" style="color:#3DCC6E">${eaten}</div><div class="stat-lbl">consumidas</div></div><div class="stat-box"><div class="stat-num" style="color:rgba(240,242,245,.7)">${Math.max(0,goal-eaten)}</div><div class="stat-lbl">restantes</div></div><div class="stat-box"><div class="stat-num" style="color:#B57BFF">${prot.toFixed(0)}g</div><div class="stat-lbl">proteína / ${protGoal}g</div></div>`;
+}
+function renderMacroChart(){
+  const prot=state.todayLog.reduce((s,f)=>s+f.proteina,0),carbs=state.todayLog.reduce((s,f)=>s+f.carbos,0),fat=state.todayLog.reduce((s,f)=>s+f.grasa,0),fiber=state.todayLog.reduce((s,f)=>s+f.fibra,0);
+  if(macroChart) macroChart.destroy();
+  macroChart=new Chart(document.getElementById('macroChart').getContext('2d'),{type:'doughnut',data:{labels:['Proteína','Carbos','Grasa','Fibra'],datasets:[{data:[prot,carbs,fat,fiber],backgroundColor:['#B57BFF','#FFCA3A','#FF9040','#3DCC6E'],borderColor:'rgba(255,255,255,.06)',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'rgba(240,242,245,.6)',font:{family:'Inter',size:12,weight:'500'},boxWidth:10}}}}});
+}
+function renderWeekChart(){
+  const days=[],vals=[],goal=state.profile.calGoal||2000;
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toLocaleDateString('es-MX',{weekday:'short'}));const entry=state.weekHistory.find(h=>h.date===d.toLocaleDateString('es-MX'));vals.push(entry?entry.kcal:(i===0?state.todayLog.reduce((s,f)=>s+f.kcal,0):0));}
+  if(weekChart) weekChart.destroy();
+  weekChart=new Chart(document.getElementById('weekChart').getContext('2d'),{type:'bar',data:{labels:days,datasets:[{label:'kcal',data:vals,backgroundColor:vals.map(v=>v>=goal?'#3DCC6E':v>0?'rgba(61,204,110,.4)':'rgba(255,255,255,.05)'),borderRadius:8,borderSkipped:false},{label:'meta',data:Array(7).fill(goal),type:'line',borderColor:'rgba(255,144,64,.7)',borderDash:[4,4],pointRadius:0,borderWidth:2,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'rgba(240,242,245,.5)',font:{family:'Inter',size:11}}}},scales:{x:{ticks:{color:'rgba(240,242,245,.35)',font:{family:'Inter',size:11}},grid:{display:false},border:{display:false}},y:{ticks:{color:'rgba(240,242,245,.35)',font:{family:'Inter',size:11}},grid:{color:'rgba(255,255,255,.05)'},border:{display:false}}}}});
+}
+function renderWeightLog(){
+  const el=document.getElementById('weightLog');
+  if(!state.weightLog.length){el.innerHTML='<div class="empty" style="padding:12px 0"><p>Sin registros aún.</p></div>';return;}
+  el.innerHTML=[...state.weightLog].reverse().map((w,i,arr)=>{const prev=arr[i+1];let delta='';if(prev){const diff=(w.kg-prev.kg).toFixed(1);delta=`<span class="weight-delta ${diff<=0?'down':'up'}">${diff>0?'+':''}${diff} kg</span>`;}return`<div class="weight-entry"><div><div class="weight-date">📅 ${w.date}</div>${w.note?`<div class="weight-note">📝 ${w.note}</div>`:''}</div><div style="text-align:right"><div class="weight-val">${w.kg} kg</div>${delta}</div></div>`;}).join('');
+}
+function logWeight(){
+  const kg=parseFloat(document.getElementById('newWeight').value);const note=document.getElementById('newNote').value.trim();
+  if(!kg||isNaN(kg)) return;
+  state.weightLog.push({kg,note,date:today(),kcal:state.todayLog.reduce((s,f)=>s+f.kcal,0)});
+  save();document.getElementById('newWeight').value='';document.getElementById('newNote').value='';renderWeightLog();showToast('⚖️ Peso registrado: '+kg+' kg');
+}
+
+// ── PLANES ──
+async function renderPlanes() {
+  const el = document.getElementById('planesContent');
+  const email = state.profile.email;
+
+  if (!email) {
+    el.innerHTML = `
+      <div class="email-input-card">
+        <div style="font-size:48px;margin-bottom:14px;">📋</div>
+        <h3>Tu plan de alimentación</h3>
+        <p>Ingresa el email que le diste a tu nutriólogo<br>para ver el plan que te envió.</p>
+        <div class="email-row">
+          <input class="glass-input" id="emailInput" type="email" placeholder="tu@email.com"/>
+          <button class="btn btn-accent" onclick="setEmailAndLoad()">Ver plan</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="plan-loading"><div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><p style="margin-top:14px;font-size:13px;">Buscando tu plan…</p></div>`;
+
+  try {
+    const resp = await fetch(`${SUPA_URL}/rest/v1/planes?paciente_email=eq.${encodeURIComponent(email)}&order=created_at.desc&limit=1`, {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
+    });
+    const data = await resp.json();
+
+    if (!data || data.length === 0) {
+      el.innerHTML = `
+        <div class="plan-empty">
+          <div class="plan-empty-icon">🥗</div>
+          <p>Tu nutriólogo aún no ha enviado ningún plan<br>para <b>${email}</b>.</p>
+          <p style="margin-top:10px;font-size:12px;">¿Email incorrecto? <a href="#" onclick="clearEmail()" style="color:var(--accent)">Cambiarlo</a></p>
+        </div>`;
+      return;
+    }
+
+    currentPlan = data[0];
+    activeWeek = 0;
+    renderPlanView();
+  } catch(e) {
+    el.innerHTML = `<div class="plan-empty"><div class="plan-empty-icon">⚠️</div><p>Error al conectar. Revisa tu conexión.</p></div>`;
+  }
+}
+
+function renderPlanView() {
+  const p = currentPlan;
+  const semanas = p.semanas;
+  const fechaStr = new Date(p.created_at).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'});
+
+  const weekTabsHTML = semanas.map((s,i) =>
+    `<button class="week-tab ${i===activeWeek?'active':''}" onclick="switchWeek(${i})">${s.nombre||'Semana '+(i+1)}</button>`
+  ).join('');
+
+  const semana = semanas[activeWeek];
+  const mealIcons = { desayuno:'☀️', colacion_m:'🍎', almuerzo:'🥗', colacion_t:'🍌', cena:'🌙', snack:'🥜' };
+  const mealLabels = { desayuno:'Desayuno', colacion_m:'Colación mañana', almuerzo:'Almuerzo', colacion_t:'Colación tarde', cena:'Cena', snack:'Snack' };
+
+  const diasHTML = (semana.dias||[]).map((dia, di) => {
+    const totalKcal = (dia.comidas||[]).reduce((s,c)=>s+(c.kcal||0),0);
+    const comidasHTML = (dia.comidas||[]).map(c => `
+      <div class="meal-row">
+        <div class="meal-icon">${mealIcons[c.tipo]||'🍽️'}</div>
+        <div class="meal-info">
+          <div class="meal-type">${mealLabels[c.tipo]||c.tipo}</div>
+          <div class="meal-name">${c.nombre}</div>
+          ${c.detalle?`<div class="meal-detail">${c.detalle}</div>`:''}
+        </div>
+        ${c.kcal?`<div class="meal-kcal">${c.kcal} kcal</div>`:''}
+      </div>`).join('');
+    return `
+      <div class="day-card" id="daycard-${di}">
+        <div class="day-header" onclick="toggleDay(${di})">
+          <div class="day-name">${dia.dia}</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            ${totalKcal?`<div class="day-kcal">~${totalKcal} kcal</div>`:''}
+            <div class="day-chevron">▼</div>
+          </div>
+        </div>
+        <div class="day-body">${comidasHTML}</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('planesContent').innerHTML = `
+    <div class="plan-hero">
+      <div class="plan-hero-top">
+        <div>
+          <div class="plan-badge">Plan activo</div>
+          <div class="plan-title" style="margin-top:8px;">${p.titulo}</div>
+          <div class="plan-meta">Enviado por ${p.nutriologo_nombre||'tu nutriólogo'} · ${fechaStr}</div>
+        </div>
+        <div style="font-size:36px;">🥗</div>
+      </div>
+      ${p.descripcion?`<div class="plan-desc">${p.descripcion}</div>`:''}
+    </div>
+    <div class="week-tabs">${weekTabsHTML}</div>
+    ${diasHTML}
+    <div style="text-align:center;margin-top:16px;">
+      <a href="#" onclick="clearEmail()" style="font-size:12px;color:var(--text-muted);">Cambiar email de paciente</a>
+    </div>`;
+}
+
+function switchWeek(i) { activeWeek=i; renderPlanView(); }
+
+function toggleDay(i) {
+  const card = document.getElementById('daycard-'+i);
+  card.classList.toggle('open');
+}
+
+function setEmailAndLoad() {
+  const email = document.getElementById('emailInput').value.trim();
+  if (!email) return;
+  state.profile.email = email; save(); renderPlanes();
+}
+
+function clearEmail() { state.profile.email=''; save(); renderPlanes(); }
+
+// ── PROFILE ──
+function saveProfile(){
+  state.profile.calGoal=parseInt(document.getElementById('calGoal').value)||2000;
+  state.profile.proteinGoal=parseInt(document.getElementById('proteinGoal').value)||150;
+  state.profile.email=document.getElementById('profEmail').value;
+  state.profile.age=document.getElementById('profAge').value;
+  state.profile.weight=document.getElementById('profWeight').value;
+  state.profile.height=document.getElementById('profHeight').value;
+  state.profile.sex=document.getElementById('profSex').value;
+  state.profile.waterGoal=parseFloat(document.getElementById('waterGoal').value)||2.5;
+  state.profile.sleepGoal=parseFloat(document.getElementById('sleepGoal').value)||8;
+  save();updateRing();
+}
+function loadProfile(){
+  const p=state.profile;
+  document.getElementById('calGoal').value=p.calGoal||2000;
+  document.getElementById('proteinGoal').value=p.proteinGoal||150;
+  document.getElementById('profEmail').value=p.email||'';
+  document.getElementById('profAge').value=p.age||'';
+  document.getElementById('profWeight').value=p.weight||'';
+  document.getElementById('profHeight').value=p.height||'';
+  document.getElementById('profSex').value=p.sex||'m';
+  document.getElementById('waterGoal').value=p.waterGoal||2.5;
+  document.getElementById('sleepGoal').value=p.sleepGoal||8;
+  document.querySelectorAll('#goalTags .tag').forEach(t=>{t.classList.toggle('selected',t.getAttribute('onclick').includes(p.goal||'bajar'));});
+}
+function selectGoal(btn,val){document.querySelectorAll('#goalTags .tag').forEach(t=>t.classList.remove('selected'));btn.classList.add('selected');state.profile.goal=val;save();}
+function calcTDEE(){
+  const age=parseInt(state.profile.age),w=parseFloat(state.profile.weight),h=parseFloat(state.profile.height),sex=state.profile.sex;
+  if(!age||!w||!h){showToast('Completa tus datos primero','#FF9040');return;}
+  let bmr=sex==='m'?(10*w+6.25*h-5*age+5):(10*w+6.25*h-5*age-161);
+  const tdee=Math.round(bmr*1.55);
+  const adj=state.profile.goal==='bajar'?tdee-500:state.profile.goal==='subir'?tdee+300:tdee;
+  document.getElementById('tdeeResult').innerHTML=`BMR: <b>${Math.round(bmr)} kcal</b> · TDEE: <b>${tdee} kcal</b> · Recomendado: <b style="color:#3DCC6E">${adj} kcal</b> <button class="btn btn-accent btn-sm" style="margin-left:10px;display:inline-flex;" onclick="applyTDEE(${adj})">Aplicar</button>`;
+}
+function applyTDEE(val){document.getElementById('calGoal').value=val;state.profile.calGoal=val;save();updateRing();showToast('🎯 Meta: '+val+' kcal');}
+
+function showToast(msg,color='#3DCC6E'){
+  const t=document.getElementById('toast');t.textContent=msg;t.style.background=color;t.style.color=color==='#3DCC6E'?'#081510':'#fff';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);
+}
+function celebrate(){
+  const c=document.getElementById('confetti');c.innerHTML='';
+  const colors=['#3DCC6E','#FFCA3A','#FF9040','#B57BFF','#FF5A5A'];
+  for(let i=0;i<50;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.cssText=`left:${Math.random()*100}%;background:${colors[~~(Math.random()*colors.length)]};width:${5+Math.random()*8}px;height:${5+Math.random()*8}px;animation-delay:${Math.random()*.8}s;animation-duration:${1.2+Math.random()*.8}s;border-radius:${Math.random()>.5?'50%':'2px'}`;c.appendChild(p);}
+  setTimeout(()=>c.innerHTML='',2600);
+}
+
+checkStreak();loadProfile();renderFoodLog();updateRing();
+</script>
+</body>
+</html>
